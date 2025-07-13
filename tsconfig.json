@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "outDir": "dist",
+    "declaration": true,
+    "declarationMap": true,
+    "module": "es2022",
+    "moduleResolution": "node",
+    "target": "ES2022",
+    "strict": true,
+    "sourceMap": true
+  }
+}
