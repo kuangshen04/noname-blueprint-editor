@@ -38,7 +38,6 @@ export class ToolboxSearchCategory extends Blockly.ToolboxCategory {
     opt_parent?: Blockly.ICollapsibleToolboxItem,
   ) {
     super(categoryDef, parentToolbox, opt_parent);
-    console.log(this)
     this.initBlockSearcher();
     this.registerShortcut();
   }

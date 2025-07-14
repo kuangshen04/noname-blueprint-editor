@@ -1,13 +1,17 @@
 {
   "compilerOptions": {
-    "baseUrl": "./",
-    "outDir": "dist",
-    "declaration": true,
-    "declarationMap": true,
-    "module": "es2022",
-    "moduleResolution": "node",
     "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "Node",
     "strict": true,
-    "sourceMap": true
-  }
+//    "jsx": "react-jsx", // 如果使用 React
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "types": ["vite/client"],
+    "paths":{
+      "@/*": ["src/*"],
+    }
+  },
+  "include": ["src"]
 }

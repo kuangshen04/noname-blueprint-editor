@@ -1,5 +1,4 @@
 import * as Blockly from "blockly/core";
-import { BlockInfo, ToolboxInfo, ToolboxItemInfo, StaticCategoryInfo } from "blockly/core/utils/toolbox";
 import { BlockDefinition } from "./types";
 
 type stringTree = {[name: string]: stringTree | null;}
@@ -7,7 +6,7 @@ type stringTree = {[name: string]: stringTree | null;}
 export class ToolboxManager {
 	private static instance: ToolboxManager | null = null;
 
-    private blocks: { [name: string]: BlockDefinition } = {};
+    private blocks: Record<string, BlockDefinition> = {};
     // private toolboxTree: stringTree = {};
     // private toolboxMap: { [name: string]: ToolboxItemInfo } = {};
 
@@ -33,13 +32,21 @@ export class ToolboxManager {
 		// };
 	}
 
-	public registerToolboxBlocks(blocks: { [name: string]: BlockDefinition }): void {
+	public registerToolboxBlocks(blocks: Record<string, BlockDefinition>): void {
 		for (const [name, block] of Object.entries(blocks)) {
 			this.registerToolboxBlock(name, block);
 		}
 	}
 
-    public initBlocks() {
+    public init() {
+		const modules = import.meta.glob('@/ui/blocks/**/*.ts', { eager: true });
+
+		Object.values(modules).forEach((mod: any) => {
+			if (mod.blocks) {
+				this.registerToolboxBlocks(mod.blocks);
+			}
+		});
+
         Blockly.common.defineBlocks(this.blocks);
         // const ws = Blockly.inject(blocklyDiv, { toolbox: this.getToolbox() });
         // return ws;

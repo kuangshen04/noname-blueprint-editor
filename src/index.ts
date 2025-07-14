@@ -9,20 +9,18 @@ import * as Zh from "blockly/msg/zh-hans";
 import "./ui/plugins/toolbox-search";
 import * as SuggestedBlocks from "./ui/plugins/suggested-blocks";
 import { WorkspaceSearch } from "@blockly/plugin-workspace-search";
-import "./ui/blocks/text";
-import  "./ui/blocks/noname";
-import { forBlock } from "./generators/javascript";
-import { javascriptGenerator } from "blockly/javascript";
 import { save, load } from "./serialization";
 import { toolbox } from "./ui/blocks/toolbox";
 import "./index.css";
-import {ToolboxManager} from "./ui/blocks/ToolboxManager";
+import {ToolboxManager} from "./ui/ToolboxManager";
+import {JavascriptGeneratorManager} from "./generators/GeneratorManager";
+import {javascriptGenerator} from "blockly/javascript";
 
-Blockly.setLocale(Zh);
+Blockly.setLocale(Zh as unknown as Record<string, string>);
 (window as any).Blockly = Blockly; // Make Blockly globally available for debugging
 
-ToolboxManager.getInstance().initBlocks();
-Object.assign(javascriptGenerator.forBlock, forBlock);
+ToolboxManager.getInstance().init();
+JavascriptGeneratorManager.getInstance().init();
 
 // Set up UI elements and inject Blockly
 const codeDiv = document.getElementById("generatedCode")?.firstChild;
@@ -48,17 +46,17 @@ SuggestedBlocks.init(workspace);
 // generated code from the workspace, and evals the code.
 // In a real application, you probably shouldn't use `eval`.
 const runCode = () => {
-	// const code = javascriptGenerator.workspaceToCode(ws as Blockly.Workspace);
-	// if (codeDiv) codeDiv.textContent = code;
+	const code = javascriptGenerator.workspaceToCode(workspace);
+	if (codeDiv) codeDiv.textContent = code;
 
 	// if (outputDiv) outputDiv.innerHTML = "";
 
 	// eval(code);
-	const json = Blockly.serialization.workspaces.save(workspace);
-	if (json) {
-		const code = JSON.stringify(json, null, 2);
-		if (codeDiv) codeDiv.textContent = code;
-	}
+	// const json = Blockly.serialization.workspaces.save(workspace);
+	// if (json) {
+	// 	const code = JSON.stringify(json, null, 2);
+	// 	if (codeDiv) codeDiv.textContent = code;
+	// }
 };
 
 if (workspace) {

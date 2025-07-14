@@ -1,11 +1,11 @@
-import { FieldTextInput, FieldDropdown, FieldNumber } from "blockly/core";
-import { inputs } from "blockly/core";
+import { FieldTextInput, FieldDropdown } from "blockly/core";
 import {ToolboxItemInfo} from "blockly/core/utils/toolbox";
-import {ToolboxManager} from "./ToolboxManager";
+import { inputs } from "blockly/core";
 const { Align } = inputs;
+import { BlockDefinition } from "@/ui/types";
 
 
-ToolboxManager.getInstance().registerToolboxBlocks({
+export const blocks: Record<string, BlockDefinition> = {
 	trigger_container: {
 		init() {
 			this.appendDummyInput("name")
@@ -29,6 +29,11 @@ ToolboxManager.getInstance().registerToolboxBlocks({
 			this.setColour(0);
 		},
 	},
+	// trigger_timing_connector:{
+	// 	init(){
+	//
+	// 	}
+	// },
 	trigger_timing_before: {
 		init() {
 			this.appendValueInput("event").setCheck("GameEvent");
@@ -85,8 +90,7 @@ ToolboxManager.getInstance().registerToolboxBlocks({
 		init() {
 			this.appendDummyInput('dummy')
 				.appendField('判定牌亮出时');
-			this.setPreviousStatement(true, 'Trigger');
-			this.setNextStatement(true, 'Trigger');
+			this.setOutput(true, "Trigger");
 			this.setTooltip('判定牌亮出的时机，可以用于改判');
 			this.setHelpUrl('');
 			this.setColour(45);
@@ -114,27 +118,27 @@ ToolboxManager.getInstance().registerToolboxBlocks({
 			this.setColour(225);
 		},
 	},
-	trigger_filter_checkEventPlayer: {
+	trigger_eventPlayer: {
 		init: function () {
-			this.appendValueInput("player").setCheck("Player")
-				.appendField("当前玩家是");
-			this.setOutput(true, "Boolean");
-			this.setTooltip("检查当前事件执行者");
+			this.appendDummyInput("dummy").appendField("当前玩家");
+			this.setOutput(true, "Player");
+			this.setTooltip("当前时机的玩家");
 			this.setHelpUrl("");
-			this.setColour(330);
+			this.setColour(225);
 		},
 	},
 	event_phaseDraw_changeNum: {
 		init() {
 			this.appendValueInput("count").setCheck("Number")
+				.appendField("额定摸牌数")
 				.appendField(
 					new FieldDropdown([
 						["增加", "increase"],
 						["减少", "decrease"],
+						["改为", "set"],
 					]),
 					"action"
-				)
-				.appendField("额定摸牌数");
+				);
 			this.setPreviousStatement(true, null);
 			this.setNextStatement(true, null);
 			this.setTooltip("在摸牌阶段使用，更改额定的摸牌数");
@@ -173,12 +177,12 @@ ToolboxManager.getInstance().registerToolboxBlocks({
 		init() {
 			this.appendDummyInput("dummy").appendField("你");
 			this.setOutput(true, "Player");
-			this.setTooltip("代表当前技能的持有者或者牌的使用者");
+			this.setTooltip("当前技能的持有者或者牌的使用者");
 			this.setHelpUrl("");
 			this.setColour(225);
 		},
 	},
-});
+};
 
 export const nonameToolbox: ToolboxItemInfo = {
 	kind: 'category',
@@ -219,14 +223,14 @@ export const nonameToolbox: ToolboxItemInfo = {
 		},
 		{
 			kind: 'block',
-			type: 'trigger_filter_checkEventPlayer',
-			inputs: {
-				player: {
-					shadow: {
-						type: 'selector_player_self',
-					},
-				},
-			},
+			type: 'trigger_eventPlayer',
+			// inputs: {
+			// 	player: {
+			// 		shadow: {
+			// 			type: 'selector_player_self',
+			// 		},
+			// 	},
+			// },
 		},
 		{
 			kind: 'block',

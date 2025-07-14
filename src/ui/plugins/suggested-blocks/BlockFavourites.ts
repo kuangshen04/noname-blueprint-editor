@@ -50,7 +50,6 @@ export class ToolboxFavouritesCategory extends Blockly.ToolboxCategory {
         options?: Options
     ) {
         super(categoryDef, parentToolbox, opt_parent);
-        console.log(this)
         this.options = parseOptions(options);
         this.registerSerializer();
         toolboxFavouritesLookup.set(this.workspace_, this);
@@ -80,6 +79,7 @@ export class ToolboxFavouritesCategory extends Blockly.ToolboxCategory {
      */
     override init() {
         super.init();
+        this.matchBlocks();
         registerContextMenus(this.options);
     }
 

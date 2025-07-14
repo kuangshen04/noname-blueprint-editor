@@ -151,7 +151,7 @@ export class BlockSuggestor {
 		if (blockList.length == 0) {
 			blockList.push({
 				kind: "LABEL",
-				text: "No blocks have been used yet!",
+				text: Blockly.Msg["SUGGESTED_BLOCKS_EMPTY"],
 			});
 		}
 		return blockList;

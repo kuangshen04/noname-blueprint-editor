@@ -35,3 +35,5 @@ Blockly.Msg['EMPTY_FAVOURITES_CONFIRM'] = '清空收藏夹？此操作不可撤�
 Blockly.Msg['PASTE_ALL_FROM_FAVOURITES'] = '粘贴全部';
 // context menu - Remove the selected Block from the favourites.
 Blockly.Msg['REMOVE_FROM_FAVOURITES'] = '移除';
+
+Blockly.Msg['SUGGESTED_BLOCKS_EMPTY'] = '还没有积木被使用过';
