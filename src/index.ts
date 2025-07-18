@@ -15,6 +15,10 @@ import "./index.css";
 import {ToolboxManager} from "./ui/ToolboxManager";
 import {JavascriptGeneratorManager} from "./generators/GeneratorManager";
 import {javascriptGenerator} from "blockly/javascript";
+import {format} from 'prettier/standalone';
+import parserBabel from 'prettier/plugins/babel';
+import prettierPluginEstree from "prettier/plugins/estree";
+import {pluginInfo as genericConnectionCheckerInfo} from "@/ui/GenericConnectionChecker";
 
 Blockly.setLocale(Zh as unknown as Record<string, string>);
 (window as any).Blockly = Blockly; // Make Blockly globally available for debugging
@@ -32,6 +36,9 @@ if (!blocklyDiv) {
 }
 const workspace = Blockly.inject(blocklyDiv, {
 	toolbox,
+	plugins: {
+		...genericConnectionCheckerInfo
+	},
 	zoom: {
 		controls: true,
 	},
@@ -42,11 +49,51 @@ workspaceSearch.init();
 
 SuggestedBlocks.init(workspace);
 
+const workspaceToCode = async (workspace: Blockly.Workspace, name: string) => {
+
+	const code = [];
+	javascriptGenerator.init(workspace);
+	const blocks = workspace.getTopBlocks(true).filter(block => block.type === "trigger_container");
+	for (let i = 0, block; (block = blocks[i]); i++) {
+		let line = javascriptGenerator.blockToCode(block);
+		if (Array.isArray(line)) {
+			// Value blocks return tuples of code and operator order.
+			// Top-level blocks don't care about operator order.
+			line = line[0];
+		}
+		if (line) {
+			if (block.outputConnection) {
+				// This block is a naked value.  Ask the language's code generator if
+				// it wants to append a semicolon, or something.
+				line = javascriptGenerator.scrubNakedValue(line);
+				if (javascriptGenerator.STATEMENT_PREFIX && !block.suppressPrefixSuffix) {
+					line = javascriptGenerator.injectId(javascriptGenerator.STATEMENT_PREFIX, block) + line;
+				}
+				if (javascriptGenerator.STATEMENT_SUFFIX && !block.suppressPrefixSuffix) {
+					line = line + javascriptGenerator.injectId(javascriptGenerator.STATEMENT_SUFFIX, block);
+				}
+			}
+			code.push(line);
+		}
+	}
+	// Blank line between each section.
+	let codeString = `lib.skill[${name}] = {
+		group: [${blocks.map(block => '"' + name + "_" + block.getFieldValue("name") + '"').join(", ")}],
+		subSkill: {
+			${code.join('\n')}
+		},
+	};`;
+	codeString = javascriptGenerator.finish(codeString);
+	return await format(codeString, {
+		parser: "babel",
+		plugins: [parserBabel, prettierPluginEstree]
+	});
+}
 // This function resets the code and output divs, shows the
 // generated code from the workspace, and evals the code.
 // In a real application, you probably shouldn't use `eval`.
-const runCode = () => {
-	const code = javascriptGenerator.workspaceToCode(workspace);
+const runCode = async () => {
+	const code = await workspaceToCode(workspace, "name");
 	if (codeDiv) codeDiv.textContent = code;
 
 	// if (outputDiv) outputDiv.innerHTML = "";

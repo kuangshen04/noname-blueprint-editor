@@ -1,87 +1,41 @@
 import { FieldTextInput, FieldDropdown } from "blockly/core";
 import {ToolboxItemInfo} from "blockly/core/utils/toolbox";
-import { inputs } from "blockly/core";
-const { Align } = inputs;
-import { BlockDefinition } from "@/ui/types";
+import type {BlockDefinition, BlockDefinitionMap} from "@/ui/BlockDefinition";
+import {TYPES} from "@/types";
 
+const timingTooltip: Record<string, string> = {
+	before: "事件开始前的时机",
+	begin: "事件开始的时机",
+	end: "事件结束的时机",
+	after: "事件结束后的时机"
+}
 
-export const blocks: Record<string, BlockDefinition> = {
-	trigger_container: {
-		init() {
-			this.appendDummyInput("name")
-				.appendField("效果名")
-				.appendField(new FieldTextInput("效果"), "name");
-			this.appendValueInput("trigger")
-				.setCheck("Trigger")
-				.appendField("当")
-				.setAlign(Align.RIGHT);
-			this.appendValueInput("filter")
-				.setCheck("Boolean")
-				.appendField("若")
-				.setAlign(Align.RIGHT);
-			this.appendStatementInput("content")
-				.setCheck("Content")
-				.appendField("执行")
-				.setAlign(Align.RIGHT);
-			// this.setNextStatement(true, null);
-			this.setTooltip("一个被动技能的起点");
-			this.setHelpUrl("");
-			this.setColour(0);
-		},
-	},
+export const blocks: BlockDefinitionMap = {
 	// trigger_timing_connector:{
 	// 	init(){
 	//
 	// 	}
 	// },
-	trigger_timing_before: {
+	trigger_timing: {
 		init() {
-			this.appendValueInput("event").setCheck("GameEvent");
+			this.appendValueInput("event").setCheck(TYPES.Event);
 			this.appendDummyInput("dummy")
-				.appendField("开始前");
+				.appendField(
+					new FieldDropdown([
+						["开始前", "before"],
+						["开始时", "begin"],
+						["结束时", "end"],
+						["结束后", "after"],
+					]),
+					"timing"
+				);
 			// this.setPreviousStatement(true, 'Trigger');
 			// this.setNextStatement(true, 'Trigger');
-			this.setOutput(true, "Trigger");
-			this.setTooltip("事件开始前的时机");
-			this.setHelpUrl("");
-			this.setColour(45);
-		},
-	},
-	trigger_timing_begin: {
-		init() {
-			this.appendValueInput("event").setCheck("GameEvent");
-			this.appendDummyInput("dummy")
-				.appendField("开始时");
-			// this.setPreviousStatement(true, 'Trigger');
-			// this.setNextStatement(true, 'Trigger');
-			this.setOutput(true, "Trigger");
-			this.setTooltip("事件开始的时机");
-			this.setHelpUrl("");
-			this.setColour(45);
-		},
-	},
-	trigger_timing_end: {
-		init() {
-			this.appendValueInput("event").setCheck("GameEvent");
-			this.appendDummyInput("dummy")
-				.appendField("结束时");
-			// this.setPreviousStatement(true, 'Trigger');
-			// this.setNextStatement(true, 'Trigger');
-			this.setOutput(true, "Trigger");
-			this.setTooltip("事件结束的时机");
-			this.setHelpUrl("");
-			this.setColour(45);
-		},
-	},
-	trigger_timing_after: {
-		init() {
-			this.appendValueInput("event").setCheck("GameEvent");
-			this.appendDummyInput("dummy")
-				.appendField("结束后");
-			// this.setPreviousStatement(true, 'Trigger');
-			// this.setNextStatement(true, 'Trigger');
-			this.setOutput(true, "Trigger");
-			this.setTooltip("事件结束后的时机");
+			this.setOutput(true, TYPES.Trigger);
+			this.setTooltip((): string => {
+				const value = this.getFieldValue('timing');
+				return timingTooltip[value];
+			});
 			this.setHelpUrl("");
 			this.setColour(45);
 		},
@@ -90,7 +44,7 @@ export const blocks: Record<string, BlockDefinition> = {
 		init() {
 			this.appendDummyInput('dummy')
 				.appendField('判定牌亮出时');
-			this.setOutput(true, "Trigger");
+			this.setOutput(true, TYPES.Trigger);
 			this.setTooltip('判定牌亮出的时机，可以用于改判');
 			this.setHelpUrl('');
 			this.setColour(45);
@@ -101,7 +55,7 @@ export const blocks: Record<string, BlockDefinition> = {
 			this.appendDummyInput("dummy").appendField("摸牌阶段");
 			// this.setPreviousStatement(true, 'Trigger');
 			// this.setNextStatement(true, 'Trigger');
-			this.setOutput(true, "GameEvent");
+			this.setOutput(true, TYPES.Event);
 			this.setTooltip("摸牌阶段");
 			this.setHelpUrl("");
 			this.setColour(225);
@@ -112,7 +66,7 @@ export const blocks: Record<string, BlockDefinition> = {
 			this.appendDummyInput("dummy").appendField("结束阶段");
 			// this.setPreviousStatement(true, 'Trigger');
 			// this.setNextStatement(true, 'Trigger');
-			this.setOutput(true, "GameEvent");
+			this.setOutput(true, TYPES.Event);
 			this.setTooltip("结束阶段");
 			this.setHelpUrl("");
 			this.setColour(225);
@@ -148,7 +102,7 @@ export const blocks: Record<string, BlockDefinition> = {
 	},
 	event_judge_replaceJudgeCard: {
 		init() {
-			this.appendValueInput('newCard').setCheck("Card")
+			this.appendValueInput('newCard').setCheck(TYPES.Card)
 				.appendField('用');
 			this.appendDummyInput('dummy')
 				.appendField('替换亮出的判定牌');
@@ -161,7 +115,7 @@ export const blocks: Record<string, BlockDefinition> = {
 	},
 	player_draw: {
 		init() {
-			this.appendValueInput("player").setCheck("Player");
+			this.appendValueInput("player").setCheck(TYPES.Player);
 			this.appendValueInput("count").setCheck("Number")
 				.appendField("摸")
 			this.appendDummyInput("text")
@@ -173,10 +127,38 @@ export const blocks: Record<string, BlockDefinition> = {
 			this.setColour(180);
 		},
 	},
+	player_recover: {
+		init() {
+			this.appendValueInput("player").setCheck(TYPES.Player);
+			this.appendValueInput("count").setCheck("Number")
+				.appendField("回复")
+			this.appendDummyInput("text")
+				.appendField("点体力");
+			this.setPreviousStatement(true, null);
+			this.setNextStatement(true, null);
+			this.setTooltip("回复体力");
+			this.setHelpUrl("");
+			this.setColour(180);
+		}
+	},
+	player_damage: {
+		init() {
+			this.appendValueInput("player").setCheck(TYPES.Player);
+			this.appendValueInput("count").setCheck("Number")
+				.appendField("受到")
+			this.appendDummyInput("text")
+				.appendField("点伤害");
+			this.setPreviousStatement(true, null);
+			this.setNextStatement(true, null);
+			this.setTooltip("受到伤害");
+			this.setHelpUrl("");
+			this.setColour(180);
+		},
+	},
 	selector_player_self: {
 		init() {
 			this.appendDummyInput("dummy").appendField("你");
-			this.setOutput(true, "Player");
+			this.setOutput(true, TYPES.Player);
 			this.setTooltip("当前技能的持有者或者牌的使用者");
 			this.setHelpUrl("");
 			this.setColour(225);
@@ -195,19 +177,31 @@ export const nonameToolbox: ToolboxItemInfo = {
 		},
 		{
 			kind: 'block',
-			type: 'trigger_timing_before',
+			type: 'trigger_timing',
+			fields: {
+				timing: 'before',
+			},
 		},
 		{
 			kind: 'block',
-			type: 'trigger_timing_begin',
+			type: 'trigger_timing',
+			fields: {
+				timing: 'begin',
+			},
 		},
 		{
 			kind: 'block',
-			type: 'trigger_timing_end',
+			type: 'trigger_timing',
+			fields: {
+				timing: 'end',
+			},
 		},
 		{
 			kind: 'block',
-			type: 'trigger_timing_after',
+			type: 'trigger_timing',
+			fields: {
+				timing: 'after',
+			},
 		},
 		{
 			kind: 'block',
@@ -260,6 +254,44 @@ export const nonameToolbox: ToolboxItemInfo = {
 		{
 			kind: 'block',
 			type: 'player_draw',
+			inputs: {
+				player: {
+					shadow: {
+						type: 'selector_player_self',
+					},
+				},
+				count: {
+					shadow: {
+						type: 'math_number',
+						fields: {
+							NUM: 1,
+						},
+					},
+				},
+			},
+		},
+		{
+			kind: 'block',
+			type: 'player_recover',
+			inputs: {
+				player: {
+					shadow: {
+						type: 'selector_player_self',
+					},
+				},
+				count: {
+					shadow: {
+						type: 'math_number',
+						fields: {
+							NUM: 1,
+						},
+					},
+				},
+			},
+		},
+		{
+			kind: 'block',
+			type: 'player_damage',
 			inputs: {
 				player: {
 					shadow: {

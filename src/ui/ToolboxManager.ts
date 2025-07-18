@@ -1,12 +1,13 @@
 import * as Blockly from "blockly/core";
-import { BlockDefinition } from "./types";
+import {BlockDefinition, BlockDefinitionMap} from "./BlockDefinition";
+import {Block} from "blockly/core";
 
 type stringTree = {[name: string]: stringTree | null;}
 
 export class ToolboxManager {
 	private static instance: ToolboxManager | null = null;
 
-    private blocks: Record<string, BlockDefinition> = {};
+    private blocks: BlockDefinitionMap = {};
     // private toolboxTree: stringTree = {};
     // private toolboxMap: { [name: string]: ToolboxItemInfo } = {};
 
@@ -14,7 +15,7 @@ export class ToolboxManager {
 
 	public registerToolboxBlock(
 		name: string,
-        block: BlockDefinition,
+        block: BlockDefinition<any>,
 		// { inputs }: { inputs?: BlockInfo["inputs"] } = {}
 	): void {
 		// const node = name.split("_");

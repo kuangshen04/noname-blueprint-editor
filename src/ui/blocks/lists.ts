@@ -1,0 +1,327 @@
+import { Block, Blocks, Events } from "blockly/core";
+
+// ensure the file imported by ToolboxManager.ts
+export const blocks = {};
+
+type ListBlock = Block & {
+	itemCount_: number;
+	prev_: {
+		[p: string]: string | undefined;
+	};
+};
+
+const checkOutputConnection = (block: Block) => {
+	if (!block.outputConnection) return;
+	const targetConnection = block.outputConnection.targetConnection;
+	if (
+		targetConnection &&
+		!block.workspace.connectionChecker.doTypeChecks(
+			block.outputConnection!,
+			targetConnection
+		)
+	) {
+		block.unplug();
+	}
+};
+
+Blocks["lists_create_with"].onchange = function (
+	this: ListBlock,
+	e: Events.Abstract
+) {
+	if (!this.prev_) {
+		this.prev_ = {
+			outputType: "Array",
+			arrayType: undefined,
+		};
+	}
+	let outputType = this.outputConnection!.getCheck()![0];
+	const inputConnections = this.inputList.map((i) => i.connection);
+	const arrayType = inputConnections
+		.find((i) => (i?.targetConnection?.getCheck()?.length || 0) > 0)
+		?.targetConnection!.getCheck()![0];
+	if (
+		outputType === this.prev_.outputType &&
+		arrayType === this.prev_.arrayType
+	) {
+		return;
+	}
+
+	Events.setGroup(e.group);
+	if (!arrayType) {
+		inputConnections.forEach((i) => i?.setCheck(null));
+		outputType = "Array";
+		this.setOutput(true, outputType);
+		checkOutputConnection(this);
+	} else {
+		inputConnections.forEach((i) => i?.setCheck(arrayType));
+		outputType = `Array<${arrayType}>`;
+		this.setOutput(true, outputType);
+		checkOutputConnection(this);
+	}
+	this.prev_.outputType = outputType;
+	this.prev_.arrayType = arrayType;
+	Events.setGroup(false);
+};
+
+Blocks["lists_repeat"].onchange = function (
+	this: ListBlock,
+	e: Events.Abstract
+) {
+	if (!this.prev_) {
+		this.prev_ = {
+			outputType: "Array",
+			arrayType: undefined,
+		};
+	}
+	let outputType = this.outputConnection!.getCheck()![0];
+	const arrayType =
+		this.getInput("ITEM")!.connection?.targetConnection?.getCheck()?.[0];
+	if (
+		outputType === this.prev_.outputType &&
+		arrayType === this.prev_.arrayType
+	) {
+		return;
+	}
+
+	Events.setGroup(e.group);
+	if (!arrayType) {
+		outputType = "Array";
+		this.setOutput(true, outputType);
+		checkOutputConnection(this);
+	} else {
+		outputType = `Array<${arrayType}>`;
+		this.setOutput(true, outputType);
+		checkOutputConnection(this);
+	}
+	this.prev_.outputType = outputType;
+	this.prev_.arrayType = arrayType;
+	Events.setGroup(false);
+};
+
+Blocks["lists_indexOf"].onchange = function (
+	this: ListBlock,
+	e: Events.Abstract
+) {
+	if (!this.prev_) {
+		this.prev_ = {
+			findType: undefined,
+			arrayType: "Array",
+		};
+	}
+
+	const list = this.getInput('VALUE');
+	const find = this.getInput('FIND');
+	const listType = list?.connection?.targetConnection?.getCheck()?.[0];
+	const findType = find?.connection?.targetConnection?.getCheck()?.[0];
+	if (
+		this.prev_.findType === findType &&
+		this.prev_.arrayType === listType
+	) {
+		return;
+	}
+
+	Events.setGroup(e.group);
+	if (listType){
+		const arrayType = listType.match(/\w+<(\w+)>/)?.[1] || null;
+		find?.setCheck(arrayType);
+		if (find!.connection?.targetConnection &&
+			!this.workspace.connectionChecker.doTypeChecks(
+				find!.connection.targetConnection,
+				find!.connection
+			)) {
+			find!.connection.targetBlock()?.unplug();
+		}
+		this.bumpNeighbours();
+	}
+	this.prev_.arrayType = listType;
+	this.prev_.findType = findType;
+	Events.setGroup(false);
+};
+
+Blocks["lists_getIndex"].onchange = function (
+	this: ListBlock,
+	e: Events.Abstract
+) {
+	if (!this.prev_) {
+		this.prev_ = {
+			outputType: undefined,
+			arrayType: undefined,
+		};
+	}
+	let outputType = this.outputConnection!.getCheck()?.[0];
+	const arrayType =
+		this.getInput("VALUE")!.connection?.targetConnection?.getCheck()?.[0]?.match(/\w+<(\w+)>/)?.[1];
+	if (
+		outputType === this.prev_.outputType &&
+		arrayType === this.prev_.arrayType
+	) {
+		return;
+	}
+
+
+	Events.setGroup(e.group);
+	if (!arrayType) {
+		outputType = undefined;
+		this.setOutput(true);
+		checkOutputConnection(this);
+	} else {
+		outputType = arrayType;
+		this.setOutput(true, outputType);
+		checkOutputConnection(this);
+	}
+	this.prev_.outputType = outputType;
+	this.prev_.arrayType = arrayType;
+	Events.setGroup(false);
+};
+
+Blocks["lists_setIndex"].onchange = function (
+	this: ListBlock,
+	e: Events.Abstract
+) {
+
+	if (!this.prev_) {
+		this.prev_ = {
+			setType: undefined,
+			arrayType: "Array",
+		};
+	}
+
+	const list = this.getInput('LIST');
+	const set = this.getInput('TO');
+	const listType = list?.connection?.targetConnection?.getCheck()?.[0];
+	const setType = set?.connection?.targetConnection?.getCheck()?.[0];
+	if (
+		this.prev_.setType === setType &&
+		this.prev_.arrayType === listType
+	) {
+		return;
+	}
+
+	Events.setGroup(e.group);
+	if (listType){
+		const arrayType = listType.match(/\w+<(\w+)>/)?.[1] || null;
+		set?.setCheck(arrayType);
+		if (set!.connection?.targetConnection &&
+			!this.workspace.connectionChecker.doTypeChecks(
+				set!.connection.targetConnection,
+				set!.connection
+			)) {
+			set!.connection.targetBlock()?.unplug();
+		}
+		this.bumpNeighbours();
+	}
+	this.prev_.arrayType = listType;
+	this.prev_.setType = setType;
+	Events.setGroup(false);
+};
+
+Blocks["lists_getSublist"].onchange = function (this: ListBlock, e: Events.Abstract) {
+	if (!this.prev_) {
+		this.prev_ = {
+			outputType: "Array",
+			arrayType: "Array",
+		};
+	}
+	let outputType = this.outputConnection!.getCheck()![0];
+	const arrayType =
+		this.getInput("LIST")!.connection?.targetConnection?.getCheck()?.[0] ||
+		"Array";
+	if (
+		outputType === this.prev_.outputType &&
+		arrayType === this.prev_.arrayType
+	) {
+		return;
+	}
+
+	Events.setGroup(e.group);
+	outputType = arrayType;
+	this.setOutput(true, outputType);
+	checkOutputConnection(this);
+	this.prev_.outputType = outputType;
+	this.prev_.arrayType = arrayType;
+	Events.setGroup(false);
+};
+
+/**
+ * @override
+ * Modify this block to have the correct input and output types.
+ *
+ * @param newMode Either 'SPLIT' or 'JOIN'.
+ */
+Blocks["lists_split"].updateType_ = function (this: ListBlock, newMode: string) {
+	const mode = this.getFieldValue('MODE');
+	if (mode !== newMode) {
+		const inputConnection = this.getInput('INPUT')!.connection;
+		inputConnection!.setShadowDom(null);
+		const inputBlock = inputConnection!.targetBlock();
+		// TODO(#6920): This is probably not needed; see details in bug.
+		if (inputBlock) {
+			inputConnection!.disconnect();
+			if (inputBlock.isShadow()) {
+				inputBlock.dispose(false);
+			} else {
+				this.bumpNeighbours();
+			}
+		}
+	}
+	if (newMode === 'SPLIT') {
+		this.outputConnection!.setCheck('Array<String>');
+		this.getInput('INPUT')!.setCheck('String');
+	} else {
+		this.outputConnection!.setCheck('String');
+		this.getInput('INPUT')!.setCheck('Array<String>');
+	}
+};
+
+Blocks["lists_sort"].onchange = function (this: ListBlock, e: Events.Abstract) {
+	if (!this.prev_) {
+		this.prev_ = {
+			outputType: "Array",
+			arrayType: "Array",
+		};
+	}
+	let outputType = this.outputConnection!.getCheck()![0];
+	const arrayType =
+		this.getInput("LIST")!.connection?.targetConnection?.getCheck()?.[0] ||
+		"Array";
+	if (
+		outputType === this.prev_.outputType &&
+		arrayType === this.prev_.arrayType
+	) {
+		return;
+	}
+
+	Events.setGroup(e.group);
+	outputType = arrayType;
+	this.setOutput(true, outputType);
+	checkOutputConnection(this);
+	this.prev_.outputType = outputType;
+	this.prev_.arrayType = arrayType;
+	Events.setGroup(false);
+};
+
+Blocks["lists_reverse"].onchange = function (this: ListBlock, e: Events.Abstract) {
+	if (!this.prev_) {
+		this.prev_ = {
+			outputType: "Array",
+			arrayType: "Array",
+		};
+	}
+	let outputType = this.outputConnection!.getCheck()![0];
+	const arrayType =
+		this.getInput("LIST")!.connection?.targetConnection?.getCheck()?.[0] ||
+		"Array";
+	if (
+		outputType === this.prev_.outputType &&
+		arrayType === this.prev_.arrayType
+	)
+		return;
+
+	Events.setGroup(e.group);
+	outputType = arrayType;
+	this.setOutput(true, outputType);
+	checkOutputConnection(this);
+	this.prev_.outputType = outputType;
+	this.prev_.arrayType = arrayType;
+	Events.setGroup(false);
+};

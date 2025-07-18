@@ -17,16 +17,13 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@types/node": "^24.0.10",
-    "source-map-loader": "^4.0.1",
     "typescript": "^5.0.2",
     "vite": "^7.0.4"
   },
   "dependencies": {
     "@blockly/plugin-workspace-search": "^10.1.0",
     "@blockly/shadow-block-converter": "^7.0.2",
-    "@blockly/suggested-blocks": "^6.0.1",
-    "@blockly/toolbox-search": "^3.0.1",
-    "@blockly/workspace-backpack": "^7.0.1",
-    "blockly": "^12.1.0"
+    "blockly": "^12.1.0",
+    "prettier": "^3.6.2"
   }
 }

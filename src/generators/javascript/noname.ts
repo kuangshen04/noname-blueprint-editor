@@ -11,37 +11,26 @@ export const forBlock: Record<string, JavascriptBlockGenerator> = {
         const filter = generator.valueToCode(block, "filter", Order.ATOMIC) || "true";
         const content = generator.statementToCode(block, "content") || "";
 
-        return `lib.skill["${name}"] = {
-    trigger: {
-        global: ${trigger},
-    },
-    filter: function (trigger, player) {
-return ${filter};
-    }
-    content: async function (event, trigger, player) {
-${content}},
-};\n`;
+        return `"${name}": {
+            trigger: {
+                global: ${trigger},
+            },
+            filter: function (trigger, player) { return ${filter}; },
+            content: async function (event, trigger, player) {${content}},
+        },\n`;
     },
 
-    trigger_timing_before: function (block, generator) {
+    trigger_timing: function (block, generator) {
         const event = generator.valueToCode(block, "event", Order.ATOMIC);
         if (!event) return "";
-        return [`"${event}Before"`, Order.ATOMIC];
-    },
-    trigger_timing_begin: function (block, generator) {
-        const event = generator.valueToCode(block, "event", Order.ATOMIC);
-        if (!event) return "";
-        return [`"${event}Begin"`, Order.ATOMIC];
-    },
-    trigger_timing_end: function (block, generator) {
-        const event = generator.valueToCode(block, "event", Order.ATOMIC);
-        if (!event) return "";
-        return [`"${event}End"`, Order.ATOMIC];
-    },
-    trigger_timing_after: function (block, generator) {
-        const event = generator.valueToCode(block, "event", Order.ATOMIC);
-        if (!event) return "";
-        return [`"${event}After"`, Order.ATOMIC];
+        const timingMap = {
+            before: "Before",
+            begin: "Begin",
+            end: "End",
+            after: "After",
+        };
+        const timing = block.getFieldValue("timing") as keyof typeof timingMap;
+        return [`"${event}${timingMap[timing]}"`, Order.ATOMIC];
     },
     event_phaseDraw: function (block, generator) {
         return ["phaseDraw", Order.ATOMIC];
@@ -66,6 +55,16 @@ ${content}},
         const player = generator.valueToCode(block, "player", Order.ATOMIC) || "player";
         const count = generator.valueToCode(block, "count", Order.ATOMIC) || "1";
         return `await ${player}.draw(${count});\n`;
+    },
+    player_recover: function (block, generator) {
+        const player = generator.valueToCode(block, "player", Order.ATOMIC) || "player";
+        const count = generator.valueToCode(block, "count", Order.ATOMIC) || "1";
+        return `await ${player}.recover(${count});\n`;
+    },
+    player_damage: function (block, generator) {
+        const player = generator.valueToCode(block, "player", Order.ATOMIC) || "player";
+        const count = generator.valueToCode(block, "count", Order.ATOMIC) || "1";
+        return `await ${player}.damage(${count});\n`;
     },
     selector_player_self: function (block, generator) {
         return ["player", Order.ATOMIC];
