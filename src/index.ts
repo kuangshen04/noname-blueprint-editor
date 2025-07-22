@@ -19,8 +19,7 @@ import {format} from 'prettier/standalone';
 import parserBabel from 'prettier/plugins/babel';
 import prettierPluginEstree from "prettier/plugins/estree";
 import {pluginInfo as genericConnectionCheckerInfo} from "@/ui/GenericConnectionChecker";
-import {DisableTopBlocks} from '@/ui/DisableTopBlocks'
-import {TypedVariableModal} from "@blockly/plugin-typed-variable-modal";
+import {DisableTopBlocks} from '@/ui/DisableTopBlocks';
 import {InputModal} from "@/ui/plugins/typed-variable-modal/InputModal";
 import {TYPES} from "@/types";
 
@@ -97,7 +96,7 @@ const workspaceToCode = async (workspace: Blockly.Workspace, name: string) => {
 
 	const code = [];
 	javascriptGenerator.init(workspace);
-	const blocks = workspace.getTopBlocks(true).filter(block => block.type === "trigger_container");
+	const blocks = workspace.getTopBlocks(true).filter(block => !(block.outputConnection || block.previousConnection));
 	for (let i = 0, block; (block = blocks[i]); i++) {
 		let line = javascriptGenerator.blockToCode(block);
 		if (Array.isArray(line)) {
@@ -131,7 +130,7 @@ const workspaceToCode = async (workspace: Blockly.Workspace, name: string) => {
 	return await format(codeString, {
 		parser: "babel",
 		plugins: [parserBabel, prettierPluginEstree]
-	});
+	}).catch((err) => err.message || err.toString());
 }
 // This function resets the code and output divs, shows the
 // generated code from the workspace, and evals the code.
