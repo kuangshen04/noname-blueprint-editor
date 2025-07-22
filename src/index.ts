@@ -6,19 +6,23 @@
 
 import * as Blockly from "blockly";
 import * as Zh from "blockly/msg/zh-hans";
-import "./ui/plugins/toolbox-search";
-import * as SuggestedBlocks from "./ui/plugins/suggested-blocks";
+import "@/index.css";
+import "@/ui/plugins/toolbox-search";
+import * as SuggestedBlocks from "@/ui/plugins/suggested-blocks";
 import { WorkspaceSearch } from "@blockly/plugin-workspace-search";
-import { save, load } from "./serialization";
-import { toolbox } from "./ui/blocks/toolbox";
-import "./index.css";
-import {ToolboxManager} from "./ui/ToolboxManager";
-import {JavascriptGeneratorManager} from "./generators/GeneratorManager";
+import { save, load } from "@/serialization";
+import { toolbox } from "@/ui/blocks/toolbox";
+import {ToolboxManager} from "@/ui/ToolboxManager";
+import {JavascriptGeneratorManager} from "@/generators/GeneratorManager";
 import {javascriptGenerator} from "blockly/javascript";
 import {format} from 'prettier/standalone';
 import parserBabel from 'prettier/plugins/babel';
 import prettierPluginEstree from "prettier/plugins/estree";
 import {pluginInfo as genericConnectionCheckerInfo} from "@/ui/GenericConnectionChecker";
+import {DisableTopBlocks} from '@/ui/DisableTopBlocks'
+import {TypedVariableModal} from "@blockly/plugin-typed-variable-modal";
+import {InputModal} from "@/ui/plugins/typed-variable-modal/InputModal";
+import {TYPES} from "@/types";
 
 Blockly.setLocale(Zh as unknown as Record<string, string>);
 (window as any).Blockly = Blockly; // Make Blockly globally available for debugging
@@ -43,11 +47,51 @@ const workspace = Blockly.inject(blocklyDiv, {
 		controls: true,
 	},
 });
-const workspaceSearch = new WorkspaceSearch(workspace);
-workspaceSearch.init();
-// workspaceSearch.open();
+
+new WorkspaceSearch(workspace).init();
 
 SuggestedBlocks.init(workspace);
+
+new DisableTopBlocks().init(workspace);
+/**
+ * Create the typed variable flyout.
+ * @param workspace The Blockly workspace.
+ * @returns Array of XML block elements.
+ */
+const createFlyout = function (workspace: Blockly.WorkspaceSvg): Element[] {
+	let xmlList: Element[] = [];
+	const button = document.createElement('button');
+	button.setAttribute('text', '创建变量...');
+	button.setAttribute('callbackKey', 'CREATE_TYPED_VARIABLE');
+
+	xmlList.push(button);
+
+	const blockList = Blockly.VariablesDynamic.flyoutCategoryBlocks(workspace);
+	xmlList = xmlList.concat(blockList);
+	return xmlList;
+};
+
+const types = [
+	['any', ''],
+	['Number', 'Number'],
+	['String', 'String'],
+	['Boolean', 'Boolean'],
+	['Array', 'Array'],
+	['Trigger', TYPES.Trigger],
+	['Event', TYPES.Event],
+	['Card', TYPES.Card],
+	['Player', TYPES.Player],
+];
+workspace.registerToolboxCategoryCallback(
+	'CREATE_TYPED_VARIABLE',
+	createFlyout,
+);
+const typedVarModal = new InputModal(
+	workspace,
+	'CREATE_TYPED_VARIABLE',
+	types
+);
+typedVarModal.init();
 
 const workspaceToCode = async (workspace: Blockly.Workspace, name: string) => {
 
@@ -77,7 +121,7 @@ const workspaceToCode = async (workspace: Blockly.Workspace, name: string) => {
 		}
 	}
 	// Blank line between each section.
-	let codeString = `lib.skill[${name}] = {
+	let codeString = `lib.skill["${name}"] = {
 		group: [${blocks.map(block => '"' + name + "_" + block.getFieldValue("name") + '"').join(", ")}],
 		subSkill: {
 			${code.join('\n')}

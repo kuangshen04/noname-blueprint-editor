@@ -21,9 +21,10 @@
     "vite": "^7.0.4"
   },
   "dependencies": {
+    "@blockly/plugin-typed-variable-modal": "^9.0.2",
     "@blockly/plugin-workspace-search": "^10.1.0",
     "@blockly/shadow-block-converter": "^7.0.2",
-    "blockly": "^12.1.0",
+    "blockly": "^12.2.0",
     "prettier": "^3.6.2"
   }
 }

@@ -8,15 +8,18 @@ importers:
 
   .:
     dependencies:
+      '@blockly/plugin-typed-variable-modal':
+        specifier: ^9.0.2
+        version: 9.0.2(blockly@12.2.0)
       '@blockly/plugin-workspace-search':
         specifier: ^10.1.0
-        version: 10.1.0(blockly@12.1.0)
+        version: 10.1.0(blockly@12.2.0)
       '@blockly/shadow-block-converter':
         specifier: ^7.0.2
-        version: 7.0.2(blockly@12.1.0)
+        version: 7.0.2(blockly@12.2.0)
       blockly:
-        specifier: ^12.1.0
-        version: 12.1.0
+        specifier: ^12.2.0
+        version: 12.2.0
       prettier:
         specifier: ^3.6.2
         version: 3.6.2
@@ -35,6 +38,18 @@ packages:
 
   '@asamuzakjp/css-color@3.2.0':
     resolution: {integrity: sha512-K1A6z8tS3XsmCMM86xoWdn7Fkdn9m6RSVtocUrJYIwZnFVkng/PvkEoWtOWmP+Scc6saYWHWZYbndEEXxl24jw==}
+
+  '@blockly/plugin-modal@8.0.2':
+    resolution: {integrity: sha512-+omksrLc0XZwNmLbN+1KVrW0AlrbARw+lD8oVPwSDTuUefs27qEuSPzhI4lwrord+vWr95suOoDGhfWv67odsA==}
+    engines: {node: '>=8.17.0'}
+    peerDependencies:
+      blockly: ^12.0.0
+
+  '@blockly/plugin-typed-variable-modal@9.0.2':
+    resolution: {integrity: sha512-6QyVp+iLQUrp+G06CHEZjWY9qyevFz2DSkegZHGawq/EjB8vZZjFWiybxlZfXrS2x++T7TO/UwZx99vZACOZWw==}
+    engines: {node: '>=8.17.0'}
+    peerDependencies:
+      blockly: ^12.0.0
 
   '@blockly/plugin-workspace-search@10.1.0':
     resolution: {integrity: sha512-vqp5KPSCRlKXeI58EEx7nLFHgRu4eNKtO0Y2HS0136xD3JCMlcwUAF3ZStNibxjOlQKjU+uT+AsjmuOks3uyDg==}
@@ -374,8 +389,8 @@ packages:
     resolution: {integrity: sha512-jRR5wdylq8CkOe6hei19GGZnxM6rBGwFl3Bg0YItGDimvjGtAvdZk4Pu6Cl4u4Igsws4a1fd1Vq3ezrhn4KmFw==}
     engines: {node: '>= 14'}
 
-  blockly@12.1.0:
-    resolution: {integrity: sha512-J9OMcMVR1HaqqRf3WJJpLBUHh4hy3Ma7JQoMZruRH7evS3kxrihHodVFOuqQzRvHtBtTtcQjzVLZog+0vpB58g==}
+  blockly@12.2.0:
+    resolution: {integrity: sha512-s4QL9ogEMzc4Pxfe8Oi3Kmu6SQ0ts2thzmRYjdnMSEIVZFpBZ4OUuNKvpFICqujO0yfAo99zON8KzxAFw8hA1w==}
     engines: {node: '>=18'}
 
   buffer-from@1.1.2:
@@ -641,13 +656,22 @@ snapshots:
       '@csstools/css-tokenizer': 3.0.4
       lru-cache: 10.4.3
 
-  '@blockly/plugin-workspace-search@10.1.0(blockly@12.1.0)':
+  '@blockly/plugin-modal@8.0.2(blockly@12.2.0)':
     dependencies:
-      blockly: 12.1.0
+      blockly: 12.2.0
 
-  '@blockly/shadow-block-converter@7.0.2(blockly@12.1.0)':
+  '@blockly/plugin-typed-variable-modal@9.0.2(blockly@12.2.0)':
     dependencies:
-      blockly: 12.1.0
+      '@blockly/plugin-modal': 8.0.2(blockly@12.2.0)
+      blockly: 12.2.0
+
+  '@blockly/plugin-workspace-search@10.1.0(blockly@12.2.0)':
+    dependencies:
+      blockly: 12.2.0
+
+  '@blockly/shadow-block-converter@7.0.2(blockly@12.2.0)':
+    dependencies:
+      blockly: 12.2.0
 
   '@csstools/color-helpers@5.0.2': {}
 
@@ -842,7 +866,7 @@ snapshots:
 
   agent-base@7.1.3: {}
 
-  blockly@12.1.0:
+  blockly@12.2.0:
     dependencies:
       jsdom: 26.1.0
     transitivePeerDependencies:

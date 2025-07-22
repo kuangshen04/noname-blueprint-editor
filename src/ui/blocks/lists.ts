@@ -1,4 +1,4 @@
-import { Block, Blocks, Events } from "blockly/core";
+import {Block, Blocks, Events, FieldVariable} from "blockly/core";
 
 // ensure the file imported by ToolboxManager.ts
 export const blocks = {};
@@ -70,31 +70,22 @@ Blocks["lists_repeat"].onchange = function (
 	if (!this.prev_) {
 		this.prev_ = {
 			outputType: "Array",
-			arrayType: undefined,
+			itemType: undefined,
 		};
 	}
-	let outputType = this.outputConnection!.getCheck()![0];
-	const arrayType =
+	const itemType =
 		this.getInput("ITEM")!.connection?.targetConnection?.getCheck()?.[0];
-	if (
-		outputType === this.prev_.outputType &&
-		arrayType === this.prev_.arrayType
-	) {
-		return;
-	}
+	if (itemType === this.prev_.itemType) return;
 
 	Events.setGroup(e.group);
-	if (!arrayType) {
-		outputType = "Array";
-		this.setOutput(true, outputType);
+	if (!itemType) {
+		this.setOutput(true, "Array");
 		checkOutputConnection(this);
 	} else {
-		outputType = `Array<${arrayType}>`;
-		this.setOutput(true, outputType);
+		this.setOutput(true, `Array<${itemType}>`);
 		checkOutputConnection(this);
 	}
-	this.prev_.outputType = outputType;
-	this.prev_.arrayType = arrayType;
+	this.prev_.itemType = itemType;
 	Events.setGroup(false);
 };
 
@@ -111,19 +102,19 @@ Blocks["lists_indexOf"].onchange = function (
 
 	const list = this.getInput('VALUE');
 	const find = this.getInput('FIND');
-	const listType = list?.connection?.targetConnection?.getCheck()?.[0];
+	const arrayType = list?.connection?.targetConnection?.getCheck()?.[0];
 	const findType = find?.connection?.targetConnection?.getCheck()?.[0];
 	if (
 		this.prev_.findType === findType &&
-		this.prev_.arrayType === listType
+		this.prev_.arrayType === arrayType
 	) {
 		return;
 	}
 
 	Events.setGroup(e.group);
-	if (listType){
-		const arrayType = listType.match(/\w+<(\w+)>/)?.[1] || null;
-		find?.setCheck(arrayType);
+	if (arrayType){
+		const itemType = arrayType.match(/\w+<(\w+)>/)?.[1] || null;
+		find?.setCheck(itemType);
 		if (find!.connection?.targetConnection &&
 			!this.workspace.connectionChecker.doTypeChecks(
 				find!.connection.targetConnection,
@@ -133,7 +124,7 @@ Blocks["lists_indexOf"].onchange = function (
 		}
 		this.bumpNeighbours();
 	}
-	this.prev_.arrayType = listType;
+	this.prev_.arrayType = arrayType;
 	this.prev_.findType = findType;
 	Events.setGroup(false);
 };
@@ -145,12 +136,12 @@ Blocks["lists_getIndex"].onchange = function (
 	if (!this.prev_) {
 		this.prev_ = {
 			outputType: undefined,
-			arrayType: undefined,
+			arrayType: "Array",
 		};
 	}
 	let outputType = this.outputConnection!.getCheck()?.[0];
 	const arrayType =
-		this.getInput("VALUE")!.connection?.targetConnection?.getCheck()?.[0]?.match(/\w+<(\w+)>/)?.[1];
+		this.getInput("VALUE")!.connection?.targetConnection?.getCheck()?.[0] || "Array";
 	if (
 		outputType === this.prev_.outputType &&
 		arrayType === this.prev_.arrayType
@@ -158,14 +149,15 @@ Blocks["lists_getIndex"].onchange = function (
 		return;
 	}
 
+	const itemType = arrayType.match(/\w+<(\w+)>/)?.[1] || null;
 
 	Events.setGroup(e.group);
-	if (!arrayType) {
+	if (!itemType) {
 		outputType = undefined;
 		this.setOutput(true);
 		checkOutputConnection(this);
 	} else {
-		outputType = arrayType;
+		outputType = itemType;
 		this.setOutput(true, outputType);
 		checkOutputConnection(this);
 	}
@@ -188,29 +180,27 @@ Blocks["lists_setIndex"].onchange = function (
 
 	const list = this.getInput('LIST');
 	const set = this.getInput('TO');
-	const listType = list?.connection?.targetConnection?.getCheck()?.[0];
+	const arrayType = list?.connection?.targetConnection?.getCheck()?.[0] || "Array";
 	const setType = set?.connection?.targetConnection?.getCheck()?.[0];
 	if (
 		this.prev_.setType === setType &&
-		this.prev_.arrayType === listType
+		this.prev_.arrayType === arrayType
 	) {
 		return;
 	}
 
 	Events.setGroup(e.group);
-	if (listType){
-		const arrayType = listType.match(/\w+<(\w+)>/)?.[1] || null;
-		set?.setCheck(arrayType);
-		if (set!.connection?.targetConnection &&
-			!this.workspace.connectionChecker.doTypeChecks(
-				set!.connection.targetConnection,
-				set!.connection
-			)) {
-			set!.connection.targetBlock()?.unplug();
-		}
-		this.bumpNeighbours();
+	const itemType = arrayType.match(/\w+<(\w+)>/)?.[1] || null;
+	set?.setCheck(itemType);
+	if (set!.connection?.targetConnection &&
+		!this.workspace.connectionChecker.doTypeChecks(
+			set!.connection.targetConnection,
+			set!.connection
+		)) {
+		set!.connection.targetBlock()?.unplug();
 	}
-	this.prev_.arrayType = listType;
+	this.bumpNeighbours();
+	this.prev_.arrayType = arrayType;
 	this.prev_.setType = setType;
 	Events.setGroup(false);
 };
@@ -218,26 +208,17 @@ Blocks["lists_setIndex"].onchange = function (
 Blocks["lists_getSublist"].onchange = function (this: ListBlock, e: Events.Abstract) {
 	if (!this.prev_) {
 		this.prev_ = {
-			outputType: "Array",
 			arrayType: "Array",
 		};
 	}
-	let outputType = this.outputConnection!.getCheck()![0];
 	const arrayType =
 		this.getInput("LIST")!.connection?.targetConnection?.getCheck()?.[0] ||
 		"Array";
-	if (
-		outputType === this.prev_.outputType &&
-		arrayType === this.prev_.arrayType
-	) {
-		return;
-	}
+	if (arrayType === this.prev_.arrayType) return;
 
 	Events.setGroup(e.group);
-	outputType = arrayType;
-	this.setOutput(true, outputType);
+	this.setOutput(true, arrayType);
 	checkOutputConnection(this);
-	this.prev_.outputType = outputType;
 	this.prev_.arrayType = arrayType;
 	Events.setGroup(false);
 };
@@ -276,26 +257,17 @@ Blocks["lists_split"].updateType_ = function (this: ListBlock, newMode: string) 
 Blocks["lists_sort"].onchange = function (this: ListBlock, e: Events.Abstract) {
 	if (!this.prev_) {
 		this.prev_ = {
-			outputType: "Array",
 			arrayType: "Array",
 		};
 	}
-	let outputType = this.outputConnection!.getCheck()![0];
 	const arrayType =
 		this.getInput("LIST")!.connection?.targetConnection?.getCheck()?.[0] ||
 		"Array";
-	if (
-		outputType === this.prev_.outputType &&
-		arrayType === this.prev_.arrayType
-	) {
-		return;
-	}
+	if (arrayType === this.prev_.arrayType) return;
 
 	Events.setGroup(e.group);
-	outputType = arrayType;
-	this.setOutput(true, outputType);
+	this.setOutput(true, arrayType);
 	checkOutputConnection(this);
-	this.prev_.outputType = outputType;
 	this.prev_.arrayType = arrayType;
 	Events.setGroup(false);
 };
@@ -303,25 +275,40 @@ Blocks["lists_sort"].onchange = function (this: ListBlock, e: Events.Abstract) {
 Blocks["lists_reverse"].onchange = function (this: ListBlock, e: Events.Abstract) {
 	if (!this.prev_) {
 		this.prev_ = {
-			outputType: "Array",
 			arrayType: "Array",
 		};
 	}
-	let outputType = this.outputConnection!.getCheck()![0];
 	const arrayType =
 		this.getInput("LIST")!.connection?.targetConnection?.getCheck()?.[0] ||
 		"Array";
-	if (
-		outputType === this.prev_.outputType &&
-		arrayType === this.prev_.arrayType
-	)
-		return;
+	if (arrayType === this.prev_.arrayType) return;
 
 	Events.setGroup(e.group);
-	outputType = arrayType;
-	this.setOutput(true, outputType);
+	this.setOutput(true, arrayType);
 	checkOutputConnection(this);
-	this.prev_.outputType = outputType;
 	this.prev_.arrayType = arrayType;
 	Events.setGroup(false);
 };
+
+// Blocks["controls_forEach"].onchange = function (this: ListBlock, e: Events.Abstract) {
+// 	if (!this.prev_) {
+// 		this.prev_ = {
+// 			arrayType: "Array",
+// 		};
+// 	}
+// 	const arrayType =
+// 		this.getInput("LIST")!.connection?.targetConnection?.getCheck()?.[0] ||
+// 		"Array";
+// 	if (arrayType === this.prev_.arrayType) return;
+//
+// 	Events.setGroup(e.group);
+// 	const itemType = arrayType.match(/\w+<(\w+)>/)?.[1];
+// 	const item = this.getField("VAR") as FieldVariable;
+// 	// configure_ is protected, so we use getField to access it.
+// 	item["configure_"]({
+// 		variableTypes: itemType ? [itemType] : undefined,
+// 		defaultType: itemType,
+// 	});
+// 	this.prev_.arrayType = arrayType;
+// 	Events.setGroup(false);
+// }
