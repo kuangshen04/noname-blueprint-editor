@@ -1,5 +1,6 @@
 import {Order} from "blockly/javascript";
 import {JavascriptBlockGenerator} from "@/generators/GeneratorManager";
+import {Block} from "blockly/core";
 
 export const forBlock: Record<string, JavascriptBlockGenerator> = {
     trigger_container: function (block, generator) {
@@ -15,6 +16,19 @@ export const forBlock: Record<string, JavascriptBlockGenerator> = {
             filter: function (trigger, player) { return ${filter}; },
             content: async function (event, trigger, player) {${content}},
         },\n`;
+    },
+
+    trigger_timing_connector: function (block, generator) {
+        const createWithBlock = block as Block & {itemCount_: number};
+        const elements = [];
+        for (let i = 0; i < createWithBlock.itemCount_; i++) {
+            let trigger = generator.valueToCode(block, 'ADD' + i, Order.NONE);
+            if (!trigger) continue;
+            trigger = trigger.slice(1,-1); // Remove the surrounding brackets
+            elements.push(trigger);
+        }
+        const code = '[' + elements.join(', ') + ']';
+        return [code, Order.ATOMIC];
     },
 
     trigger_timing: function (block, generator) {
