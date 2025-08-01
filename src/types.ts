@@ -5,4 +5,5 @@ export const TYPES = {
     Player: "Player",
     PlayerList: "Array<Player>",
     Card: "Card",
+    CardList: "Array<Card>",
 }

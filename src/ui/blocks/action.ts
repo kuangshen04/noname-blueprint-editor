@@ -18,6 +18,19 @@ export const blocks: BlockDefinitionMap = {
             this.setColour(180);
         },
     },
+    player_discard: {
+        init() {
+            this.appendValueInput("player").setCheck(TYPES.Player);
+            this.appendValueInput("cards").setCheck(TYPES.CardList)
+                .appendField("弃置");
+            this.setPreviousStatement(true, null);
+            this.setNextStatement(true, null);
+            this.setInputsInline(true);
+            this.setTooltip("弃牌");
+            this.setHelpUrl("");
+            this.setColour(180);
+        },
+    },
     player_recover: {
         init() {
             this.appendValueInput("player").setCheck(TYPES.Player);
@@ -107,7 +120,22 @@ export const blocks: BlockDefinitionMap = {
             this.setHelpUrl("");
             this.setColour(180);
         },
-    }
+    },
+    player_choose_card: {
+        init() {
+            this.appendValueInput("player").setCheck(TYPES.Player);
+            this.appendValueInput("count").setCheck("Number")
+                .appendField("选择");
+            this.appendValueInput("text").setCheck("String")
+                .appendField("张牌：");
+            this.setOutput(true, TYPES.CardList);
+            this.setInputsInline(true);
+            this.setTooltip("玩家选择牌，通常用于技能发动时的牌选择");
+            this.setHelpUrl("");
+            this.setColour(180);
+        },
+    },
+
 }
 
 
@@ -127,6 +155,17 @@ export const actionToolbox: ToolboxItemInfo[] = [
                     fields: {
                         NUM: 1,
                     },
+                },
+            },
+        },
+    },
+    {
+        kind: 'block',
+        type: 'player_discard',
+        inputs: {
+            player: {
+                shadow: {
+                    type: 'selector_player_self',
                 },
             },
         },
@@ -248,6 +287,33 @@ export const actionToolbox: ToolboxItemInfo[] = [
                     type: 'text',
                     fields: {
                         TEXT: "请选择目标",
+                    },
+                },
+            },
+        },
+    },
+    {
+        kind: 'block',
+        type: 'player_choose_card',
+        inputs: {
+            player: {
+                shadow: {
+                    type: 'selector_player_self',
+                },
+            },
+            count: {
+                shadow: {
+                    type: 'math_number',
+                    fields: {
+                        NUM: 1,
+                    },
+                },
+            },
+            text: {
+                shadow: {
+                    type: 'text',
+                    fields: {
+                        TEXT: "请选择牌",
                     },
                 },
             },

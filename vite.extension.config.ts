@@ -2,24 +2,20 @@ import { defineConfig } from 'vite';
 import path from 'path';
 
 export default defineConfig({
-    publicDir: false,
     root: '.',
     build: {
-        lib:{
-            entry: 'src/iframe.ts',
+        lib: {
+            entry: 'src/extension.ts',
+            fileName: (format) => `extension.js`,
             formats: ["es"],
         },
-        outDir: 'dist/iframe',
-    },
-    server: {
-        open: true,
-        host: '127.0.0.1',
-        port: 8000,
+        outDir: 'dist',
+        // sourcemap: true,
     },
     resolve: {
         alias: {
             "@": path.resolve(__dirname, 'src'),
         },
         extensions: ['.tsx', '.ts', '.js'],
-    }
+    },
 });

@@ -480,7 +480,7 @@ export const textToolbox: Blockly.utils.toolbox.ToolboxItemInfo = {
                 },
             },
         },
-        addTextToolbox
+        // addTextToolbox
     ],
 };
 

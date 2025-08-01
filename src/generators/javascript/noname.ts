@@ -41,7 +41,7 @@ export const forBlock: Record<string, JavascriptBlockGenerator> = {
             "set": "=",
         }
         const operator = block.getFieldValue("action") as keyof typeof operatorMap;
-        return `event.num ${operatorMap[operator]} ${num};\n`;
+        return `trigger.num ${operatorMap[operator]} ${num};\n`;
     },
     selector_player_self: function (block, generator) {
         return ["player", Order.ATOMIC];

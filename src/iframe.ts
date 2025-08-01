@@ -17,14 +17,19 @@ const blocklyDiv = document.getElementById("blocklyDiv") as HTMLElement;
 const workspace = createWorkspace(blocklyDiv);
 
 const runCode = async () => {
-    const code = await workspaceToCodeWithFormat(workspace, "name");
+    const code = await workspaceToCodeWithFormat(workspace, (window as any).codename);
     if (codeDiv) codeDiv.textContent = code;
 };
 
-if (workspace) {
-    // Load initial data if available
-    load(workspace);
+(window as any).Blockly = Blockly; // Make Blockly globally available for debugging
+(window as any).loadCode = (data: string = "{}") => {
+    Blockly.serialization.workspaces.load(JSON.parse(data), workspace, undefined);
     runCode();
+}
+(window as any).getSerializedResult = () => Blockly.serialization.workspaces.save(workspace);
+(window as any).getCode = (name: string) => workspaceToCode(workspace, name);
+
+if (workspace) {
 
     // Whenever the workspace changes meaningfully, run the code again.
     workspace.addChangeListener((e: Blockly.Events.Abstract) => {
@@ -38,7 +43,7 @@ if (workspace) {
         ) {
             return;
         }
-        save(workspace);
+        // save(workspace);
         runCode();
     });
 }

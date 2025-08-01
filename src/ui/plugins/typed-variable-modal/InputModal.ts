@@ -1,6 +1,7 @@
 import {TypedVariableModal} from '@blockly/plugin-typed-variable-modal';
 import {WorkspaceSvg} from "blockly/core";
 import * as Blockly from "blockly/core";
+import {TYPES} from "@/types";
 
 /**
  * A test input modal.
@@ -17,7 +18,18 @@ export class InputModal extends TypedVariableModal {
    */
   override firstTypeInput_: HTMLInputElement = null!;
 
-  constructor(workspace: WorkspaceSvg, btnCallbackName: string, types: string[][]) {
+  constructor(workspace: WorkspaceSvg, btnCallbackName: string) {
+    const types = [
+      ['any', ''],
+      ['Number', 'Number'],
+      ['String', 'String'],
+      ['Boolean', 'Boolean'],
+      ['Array', 'Array'],
+      ['Trigger', TYPES.Trigger],
+      ['Event', TYPES.Event],
+      ['Card', TYPES.Card],
+      ['Player', TYPES.Player],
+    ];
     const messages = {
       TYPED_VAR_MODAL_TITLE: '创建变量',
       TYPED_VAR_MODAL_VARIABLE_NAME_LABEL: '变量名称: ',
@@ -30,6 +42,32 @@ export class InputModal extends TypedVariableModal {
     };
     super(workspace, btnCallbackName, types, messages);
   }
+
+  override init() {
+    super.init();
+    this.workspace_.registerToolboxCategoryCallback(
+        'CREATE_TYPED_VARIABLE',
+        this.createFlyout,
+    );
+  }
+
+  /**
+   * Create the typed variable flyout.
+   * @param workspace The Blockly workspace.
+   * @returns Array of XML block elements.
+   */
+  private createFlyout(workspace: Blockly.WorkspaceSvg): Element[] {
+    let xmlList: Element[] = [];
+    const button = document.createElement('button');
+    button.setAttribute('text', '创建变量...');
+    button.setAttribute('callbackKey', 'CREATE_TYPED_VARIABLE');
+
+    xmlList.push(button);
+
+    const blockList = Blockly.VariablesDynamic.flyoutCategoryBlocks(workspace);
+    xmlList = xmlList.concat(blockList);
+    return xmlList;
+  };
 
   override createVarNameContainer_(): HTMLDivElement {
     const container = super.createVarNameContainer_();

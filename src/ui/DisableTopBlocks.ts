@@ -9,7 +9,9 @@
  */
 
 import * as Blockly from 'blockly/core';
-import {Block} from "blockly/core";
+import {Block, WorkspaceSvg, Events, BlockSvg} from "blockly/core";
+import {Abstract} from "blockly/core/events/events_abstract";
+import {common} from "blockly";
 
 /**
  * This plugin changes the logic of the enable/disable context menu item. It is
@@ -20,56 +22,48 @@ import {Block} from "blockly/core";
  * `disableOrphans`.
  */
 export class DisableTopBlocks {
-    private oldPreconditionFn: ((p1: Blockly.ContextMenuRegistry.Scope, menuOpenEvent: Event) => string) | undefined;
+    static TOP_BLOCKS_DISABLED_REASON = 'TOP_BLOCK';
+
     /**
-     * Modifies the context menu 'disable' option as described above.
+     * A block is an orphan if its parent is an orphan, or if it doesn't have a
+     * parent but it does have a previous or output connection (so it expects to be
+     * attached to something). This means all children of orphan blocks are also
+     * orphans and cannot be manually re-enabled.
+     * @param block Block to check.
+     * @returns Whether the block is an orphan.
      */
+    static isOrphan(block: Block): boolean {
+        return !!(block.outputConnection || block.previousConnection);
+    }
+
+    private topBlocks: BlockSvg[] = [];
+
     init(workspace: Blockly.Workspace) {
+        workspace.addChangeListener(this.disableTopBlocks.bind(this));
         workspace.addChangeListener(Blockly.Events.disableOrphans);
+    }
 
-        const disableMenuItem = Blockly.ContextMenuRegistry.registry.getItem('blockDisable')!;
-        this.oldPreconditionFn = disableMenuItem.preconditionFn;
-        disableMenuItem.preconditionFn = function (scope: Blockly.ContextMenuRegistry.Scope) {
-            const block = scope.block!;
-            if (
-                !block.isInFlyout &&
-                block.workspace.options.disable &&
-                block.isEditable()
-            ) {
-                if (block.getInheritedDisabled() || isOrphan(block)) {
-                    return 'disabled';
+    private disableTopBlocks(event: Abstract) {
+        if (event.type === Events.BLOCK_MOVE || event.type === Events.BLOCK_CREATE) {
+            const blockEvent = event as Events.BlockMove | Events.BlockCreate;
+            if (!blockEvent.workspaceId) return;
+
+            const eventWorkspace = common.getWorkspaceById(
+                blockEvent.workspaceId,
+            ) as WorkspaceSvg;
+
+            const blocks = eventWorkspace.getTopBlocks(false).filter(DisableTopBlocks.isOrphan);
+            for (const block of this.topBlocks) {
+                if (!blocks.includes(block)) {
+                    block.setDisabledReason(false, DisableTopBlocks.TOP_BLOCKS_DISABLED_REASON);
                 }
-                return 'enabled';
             }
-            return 'hidden';
-        };
+            this.topBlocks = blocks;
+            for (const block of this.topBlocks) {
+                if (!block.hasDisabledReason(DisableTopBlocks.TOP_BLOCKS_DISABLED_REASON)) {
+                    block.setDisabledReason(true, DisableTopBlocks.TOP_BLOCKS_DISABLED_REASON);
+                }
+            }
+        }
     }
-
-    /**
-     * Turn off the effects of this plugin and restore the initial behavior.
-     * This is never required to be called. It is optional in case you need to
-     * disable the plugin.
-     */
-    dispose() {
-        const disableMenuItem = Blockly.ContextMenuRegistry.registry.getItem('blockDisable')!;
-        disableMenuItem.preconditionFn = this.oldPreconditionFn;
-    }
-}
-
-/**
- * A block is an orphan if its parent is an orphan, or if it doesn't have a
- * parent but it does have a previous or output connection (so it expects to be
- * attached to something). This means all children of orphan blocks are also
- * orphans and cannot be manually re-enabled.
- * @param block Block to check.
- * @returns Whether the block is an orphan.
- */
-function isOrphan(block: Block): boolean {
-    // If the parent is an orphan block, this block should also be considered
-    // an orphan so it cannot be manually re-enabled.
-    const parent = /** @type {Blockly.BlockSvg} */ (block.getParent());
-    if (parent && isOrphan(parent)) {
-        return true;
-    }
-    return !parent && !!(block.outputConnection || block.previousConnection);
 }

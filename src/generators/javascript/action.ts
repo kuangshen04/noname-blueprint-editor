@@ -7,6 +7,11 @@ export const forBlock: Record<string, JavascriptBlockGenerator> = {
         const count = generator.valueToCode(block, "count", Order.ATOMIC) || "1";
         return `await ${player}.draw(${count});\n`;
     },
+    player_discard: function (block, generator) {
+        const player = generator.valueToCode(block, "player", Order.ATOMIC) || "player";
+        const cards = generator.valueToCode(block, "cards", Order.ATOMIC) || "[]";
+        return `await ${player}.discard(${cards});\n`;
+    },
     player_recover: function (block, generator) {
         const player = generator.valueToCode(block, "player", Order.ATOMIC) || "player";
         const count = generator.valueToCode(block, "count", Order.ATOMIC) || "1";
@@ -47,7 +52,15 @@ export const forBlock: Record<string, JavascriptBlockGenerator> = {
     player_choose_target: function (block, generator) {
         const player = generator.valueToCode(block, "player", Order.ATOMIC) || "player";
         const count = generator.valueToCode(block, "count", Order.ATOMIC) || "1";
+        const forced = "true";
         const text = generator.valueToCode(block, "text", Order.ATOMIC) || '"请选择目标"';
-        return [`(await ${player}.chooseTarget(${count}, ${text}).forResult()).targets`, Order.MEMBER];
-    }
+        return [`(await ${player}.chooseTarget(${count}, ${forced}, ${text}).forResult()).targets`, Order.MEMBER];
+    },
+    player_choose_card: function (block, generator) {
+        const player = generator.valueToCode(block, "player", Order.ATOMIC) || "player";
+        const count = generator.valueToCode(block, "count", Order.ATOMIC) || "1";
+        const forced = "true";
+        const text = generator.valueToCode(block, "text", Order.ATOMIC) || '"请选择牌"';
+        return [`(await ${player}.chooseCard(${count}, ${forced}, ${text}).forResult()).cards`, Order.MEMBER];
+    },
 }
