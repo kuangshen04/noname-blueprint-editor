@@ -235,7 +235,6 @@ Blocks["lists_split"].updateType_ = function (this: ListBlock, newMode: string) 
 		const inputConnection = this.getInput('INPUT')!.connection;
 		inputConnection!.setShadowDom(null);
 		const inputBlock = inputConnection!.targetBlock();
-		// TODO(#6920): This is probably not needed; see details in bug.
 		if (inputBlock) {
 			inputConnection!.disconnect();
 			if (inputBlock.isShadow()) {

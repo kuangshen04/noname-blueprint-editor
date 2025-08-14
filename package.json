@@ -7,7 +7,7 @@
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "npx vite build --config vite.extension.config.ts && npx vite build",
+    "build": "npx tsx build.ts",
     "start": "npx vite"
   },
   "keywords": [
@@ -17,8 +17,12 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "@types/node": "^24.0.10",
+    "archiver": "^7.0.1",
+    "ignore": "^7.0.5",
+    "tsx": "^4.20.3",
     "typescript": "^5.0.2",
-    "vite": "^7.0.4"
+    "vite": "^7.0.4",
+    "vite-plugin-static-copy": "^3.1.1"
   },
   "dependencies": {
     "@blockly/plugin-typed-variable-modal": "^9.0.2",

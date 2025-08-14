@@ -1,4 +1,4 @@
-import iframeHtml from "@/iframe.html?raw";
+import iframeHtml from "./iframe.html?raw";
 const path = "../../noname.js";
 const { lib, game, ui, get, ai, _status } = await import(path);
 
@@ -69,17 +69,11 @@ export default function () {
 
 
             const originalEditor = ui.create.editor2;
-            ui.create.editor2 = async function (container: HTMLDivElement, config: {
+            ui.create.editor2 = async function (container: HTMLDivElement, {value, language, saveInput}: {
                 value: string;
                 language: string;
                 saveInput: (view:{state:{doc:string}}) => void;
             }) {
-                let {
-                    value,
-                    language,
-                    saveInput
-                } = config;
-
                 value = value.trim();
                 // let reference = (Array.from(document.querySelectorAll(".menu-buttons:not(.hidden) .new_character select")) as HTMLInputElement[]).filter(i=> i.style.display !== "none").at(-1)?.value;
                 let name = (document.querySelector(".menu-buttons:not(.hidden) input.new_name") as HTMLInputElement | undefined)?.value?.split("|")[0] || "";
@@ -113,11 +107,11 @@ export default function () {
             },
             intro: [
                 "当前版本为测试版，仅提供blockly代码编辑的示例，距离成品还有一段距离。",
-                "由于本体extension menu的问题，以下提到的绝大部分功能需要改动本体。",
-                "目前仅支持新建非引用技能，在打开编辑器前请务必填写完技能名称，否则在保存时会出现名称不匹配。",
-                "引用技能将不可使用。",
-                "持久化还没做，编辑完的blockly代码暂时保存在indexDB中。"
-            ].join("\n"),
+                "* 由于本体extension menu的问题，很多没做的功能需要改动本体。",
+                "<li>目前仅支持新建非引用技能，在打开编辑器前请务必填写完技能名称，否则在保存时会出现名称不匹配。</li>",
+                "<li>引用技能将不可使用。</li>",
+                "<li>持久化还没做，编辑完的blockly代码暂时保存在indexDB中。</li>"
+            ].join("<br>"),
             author: "狂神",
             diskURL: "",
             forumURL: "",

@@ -4,7 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import "@/index.css";
+import "./iframe.css";
 import * as Blockly from "blockly";
 import {load, save} from "@/serialization";
 import {createWorkspace} from "@/workspace";

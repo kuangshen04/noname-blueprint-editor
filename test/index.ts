@@ -4,11 +4,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import "@/index.css";
+import "./index.css";
 import * as Blockly from "blockly";
 import {load, save} from "@/serialization";
 import {createWorkspace} from "@/workspace";
 import {workspaceToCode, workspaceToCodeWithFormat} from "@/generators/generator";
+
+(window as any).Blockly = Blockly; // Expose Blockly globally for debugging
 
 // Set up UI elements and inject Blockly
 const codeDiv = document.getElementById("generatedCode")?.firstChild;
